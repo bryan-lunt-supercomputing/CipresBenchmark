@@ -5,8 +5,11 @@ Created on Dec 31, 2013
 '''
 
 scheduler_conf_varnames = ["jobtype", "mpi_processes","threads_per_process","runhours","node_exclusive","nodes","ppn","queue"]
+scheduler_defaults = {}
+
 jobinfo_txt_varnames = ["Task label", "Task ID", "Tool", "created on","JobHandle","User ID","User Name", "email","JOBID", "resource"]
-jobinfo_defaults = {"Task label":"BenchmarkJob", "Task ID":"", "Tool":"", "created on":"","JobHandle":"","User ID":"","User Name":"", "email":""}
+jobinfo_defaults = {"Task label":"BenchmarkJob","JobHandle":"BenchmarkJob"}
+
 
 from itertools import product as cartprod
 
@@ -92,18 +95,20 @@ def setup_rundir(top_directory,parameter_dict):
 	#Create the _JOBINFO.TXT
 	with open(os.path.join(full_outdirname, "_JOBINFO.TXT"),"w") as JOBINFOFILE:
 		for ji_name in jobinfo_txt_varnames:
-			if parameter_dict.has_key(ji_name):
-				JOBINFOFILE.write("%s=%s\n" % (__comment_property_name(ji_name), parameter_dict.get(ji_name,jobinfo_defaults.get(ji_name)) )
+			ji_value = parameter_dict.get(ji_name, jobinfo_defaults.get(ji_name, None))
+			if ji_value is not None:
+				JOBINFOFILE.write("%s=%s\n" % (__comment_property_name(ji_name), ji_value))
 				
 	#Create the scheduler.conf
 	with open(os.path.join(full_outdirname,"scheduler.conf"),"w") as SCHEDULER_CONF:
 		for sc_name in scheduler_conf_varnames:
-			if parameter_dict.has_key(sc_name):
-				SCHEDULER_CONF.write("%s=%s\n" % (__comment_property_name(sc_name), parameter_dict[sc_name]) )
+			sc_value = parameter_dict.get(sc_name, scheduler_defaults.get(sc_name, None))
+			if sc_value is not None:
+				SCHEDULER_CONF.write("%s=%s\n" % (__comment_property_name(sc_name), sc_value) )
 	
 	#Create the COMMANDLINE
 	with open(os.path.join(full_outdirname,"COMMANDLINE"),"w") as COMMANDLINE_FILE:
-		COMMANDLINE_FILE.write("%s\n" % (parameter_dict['COMMANDLINE']) )
+		COMMANDLINE_FILE.write("%s\n" % parameter_dict['COMMANDLINE'] )
 	
 	return full_outdirname
 
@@ -111,11 +116,10 @@ def setup_rundir(top_directory,parameter_dict):
 
 import subprocess
 def submit_benchmark(submit_directory,COMMANDLINE,submitbinary="submit.py"):
-	
-	submitproc = subprocess.Popen([submitbinary,"--"] +  COMMANDLINE.split(), stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=submit_directory,shell=True)
+	submitproc = subprocess.Popen([submitbinary,"--", COMMANDLINE], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=submit_directory, shell=False)
 	stdout, stderr = submitproc.communicate();
 	if submitproc.returncode != 0:
 		print stdout
 		print "=========="
 		print stderr
-	
+		assert False
