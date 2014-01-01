@@ -105,6 +105,16 @@ def setup_rundir(top_directory,parameter_dict):
 		COMMANDLINE_FILE.write("%s\n" % (parameter_dict['COMMANDLINE']) )
 	
 	return full_outdirname
+
+
+
+import subprocess
+def submit_benchmark(submit_directory,COMMANDLINE,submitbinary="submit.py"):
 	
-def submit_benchmark(submit_directory,COMMANDLINE):
-	pass
+	submitproc = subprocess.Popen([submitbinary,"--"] +  COMMANDLINE.split(), stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=submit_directory,shell=False)
+	stdout, stderr = submitproc.communicate();
+	if submitproc.returncode != 0:
+		print stdout
+		print "=========="
+		print stderr
+	

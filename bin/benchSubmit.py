@@ -9,6 +9,7 @@ BENCHMARKDIR="./benchmarks"
 OUTPUTDIR="./output"
 INPUTDIR="./inputs"
 
+SUBMIT_PY = "submit.py"
 
 from cipresbenchmark import setup_rundir, submit_benchmark
 import cipresbenchmark.BenchmarkLoader as BL
@@ -41,7 +42,7 @@ def main():
 			shutil.copy(os.path.join(INPUTDIR,one_realization['INPUT']), os.path.join(submit_directory,"INPUT"))
 			
 			#TODO: Submit the job
-			submit_benchmark(submit_directory, one_realization['COMMANDLINE'])
+			submit_benchmark(submit_directory, one_realization['COMMANDLINE'],submitbinary=SUBMIT_PY)
 
 
 if __name__ == '__main__':
