@@ -6,6 +6,7 @@ Created on Dec 31, 2013
 
 scheduler_conf_varnames = ["jobtype", "mpi_processes","threads_per_process","runhours","node_exclusive","nodes","ppn","queue"]
 jobinfo_txt_varnames = ["Task label", "Task ID", "Tool", "created on","JobHandle","User ID","User Name", "email","JOBID", "resource"]
+jobinfo_defaults = {"Task label":"BenchmarkJob", "Task ID":"", "Tool":"", "created on":"","JobHandle":"","User ID":"","User Name":"", "email":""}
 
 from itertools import product as cartprod
 
@@ -92,7 +93,7 @@ def setup_rundir(top_directory,parameter_dict):
 	with open(os.path.join(full_outdirname, "_JOBINFO.TXT"),"w") as JOBINFOFILE:
 		for ji_name in jobinfo_txt_varnames:
 			if parameter_dict.has_key(ji_name):
-				JOBINFOFILE.write("%s=%s\n" % (__comment_property_name(ji_name), parameter_dict[ji_name]) )
+				JOBINFOFILE.write("%s=%s\n" % (__comment_property_name(ji_name), parameter_dict.get(ji_name,jobinfo_defaults.get(ji_name)) )
 				
 	#Create the scheduler.conf
 	with open(os.path.join(full_outdirname,"scheduler.conf"),"w") as SCHEDULER_CONF:
@@ -111,7 +112,7 @@ def setup_rundir(top_directory,parameter_dict):
 import subprocess
 def submit_benchmark(submit_directory,COMMANDLINE,submitbinary="submit.py"):
 	
-	submitproc = subprocess.Popen([submitbinary,"--"] +  COMMANDLINE.split(), stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=submit_directory,shell=False)
+	submitproc = subprocess.Popen([submitbinary,"--"] +  COMMANDLINE.split(), stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=submit_directory,shell=True)
 	stdout, stderr = submitproc.communicate();
 	if submitproc.returncode != 0:
 		print stdout
