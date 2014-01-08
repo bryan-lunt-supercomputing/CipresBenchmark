@@ -17,7 +17,10 @@
 #PBS -A <%account%>
 <%/account%>
 
-
+function exit_trap() {
+	date '+%s' > exit.txt
+	pkill -${1} -P $$ 
+}
 
 source /etc/profile.d/modules.sh
 
@@ -30,21 +33,15 @@ source /etc/profile.d/modules.sh
 
 cd <%jobdir%>
 
-echo Job starting at $(date) > start.txt
+#setup signal handlers
+trap "exit_trap INT" EXIT SIGINT
+trap "exit_trap TERM" SIGTERM
 
-<%#CIPRESNOTIFYURL%>
-#Notify job start
-curl <%CIPRESNOTIFYURL%>\&status=START
-<%/CIPRESNOTIFYURL%>
+date "+%s" > start.txt
 
 export CIPRES_THREADSPP=<%threads_per_process%>
 export CIPRES_NP=<%mpi_processes%>
 
 ./batch_command.cmdline 1>stdout.txt 2>stderr.txt
 
-echo Job finished at $(date) > done.txt
-
-<%#CIPRESNOTIFYURL%>
-#Notify job end
-curl <%CIPRESNOTIFYURL%>\&status=DONE
-<%/CIPRESNOTIFYURL%>
+date "+%s" > done.txt
