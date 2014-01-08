@@ -3,6 +3,7 @@ Created on Dec 31, 2013
 
 @author: Bryan Lunt <blunt@sdsc.edu>
 '''
+from __future__ import print_function
 
 scheduler_conf_varnames = ["jobtype", "mpi_processes","threads_per_process","runhours","node_exclusive","nodes","ppn","queue"]
 scheduler_defaults = {}
@@ -22,7 +23,7 @@ class Benchmark(object):
 		self.varfuncs = list()
 	
 	def setUp(self):
-		print "NOT VIRTUAL!?!?!"
+		print("NOT VIRTUAL!?!?!")
 		pass
 	
 	def setName(self,name):
@@ -113,13 +114,28 @@ def setup_rundir(top_directory,parameter_dict):
 	return full_outdirname
 
 
+def create_cipressubmit_cfg(submit_directory, benchmark_sys_dir):
+	with open(os.path.join(submit_directory, "cipressubmit.cfg"),"w") as cconfig_file:
+		#placeholder in case we want to add the job_status_email later
+		#print("[general]", file=cconfig_file)
+		#print("job_status_email=terri@sdsc.edu,mmiller@sdsc.edu")
+		
+		print("[templates]", file=cconfig_file)
+		print("templatedir=%s"%os.path.join(benchmark_sys_dir,"templates"), file=cconfig_file)
+		
+		#placeholder
+		#print("[hosts]", file=cconfig_file)
+		#print("#resourcexmldir=./hosts", file=cconfig_file)
+		
+		
+
 
 import subprocess
 def submit_benchmark(submit_directory,COMMANDLINE,submitbinary="submit.py"):
 	submitproc = subprocess.Popen([submitbinary,"--", COMMANDLINE], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=submit_directory, shell=False)
 	stdout, stderr = submitproc.communicate();
 	if submitproc.returncode != 0:
-		print stdout
-		print "=========="
-		print stderr
+		print(stdout)
+		print("==========")
+		print(stderr)
 		assert False

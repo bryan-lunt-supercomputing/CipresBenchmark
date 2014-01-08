@@ -1,0 +1,50 @@
+#!/bin/sh{{! Templated With Moustache. Reset Template Engine Delimiters to some that won't interfere with BASH }}{{=<% %>=}}
+#PBS -q <%queue.name%>
+#PBS -N <%JobHandle%>
+#PBS -l walltime=00:<%runminutes%>:00
+#PBS -l nodes=<%nodes%>:ppn=<%ppn%><%#queue.node_properties%>:<%.%><%/queue.node_properties%>
+#PBS -o scheduler_stdout.txt
+#PBS -e scheduler_stderr.txt
+#PBS -W umask=0007
+<%#env_vars_string %>
+#PBS -v <%env_vars_string%>
+<%/env_vars_string %>
+<%#job_status_email%>
+#PBS -M <%job_status_email%>
+#PBS -m ae
+<%/job_status_email%>
+<%#account%>
+#PBS -A <%account%>
+<%/account%>
+
+
+
+source /etc/profile.d/modules.sh
+
+
+<%# cluster_header %>
+#execute a per-cluster header
+<% cluster_header %>
+#End per-cluster header
+<%/ cluster_header %>
+
+cd <%jobdir%>
+
+echo Job starting at $(date) > start.txt
+
+<%#CIPRESNOTIFYURL%>
+#Notify job start
+curl <%CIPRESNOTIFYURL%>\&status=START
+<%/CIPRESNOTIFYURL%>
+
+export CIPRES_THREADSPP=<%threads_per_process%>
+export CIPRES_NP=<%mpi_processes%>
+
+./batch_command.cmdline 1>stdout.txt 2>stderr.txt
+
+echo Job finished at $(date) > done.txt
+
+<%#CIPRESNOTIFYURL%>
+#Notify job end
+curl <%CIPRESNOTIFYURL%>\&status=DONE
+<%/CIPRESNOTIFYURL%>

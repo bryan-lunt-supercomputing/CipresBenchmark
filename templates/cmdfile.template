@@ -1,0 +1,3 @@
+#!/bin/sh{{! Templated With Moustache. We need to redefine the template engine delimiters, because they look like BASH delimiters. }}{{=<% %>=}}
+<% cmdline %>
+
