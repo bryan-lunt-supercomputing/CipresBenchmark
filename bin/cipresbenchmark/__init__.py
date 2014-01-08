@@ -116,9 +116,9 @@ def setup_rundir(top_directory,parameter_dict):
 
 def create_cipressubmit_cfg(submit_directory, benchmark_sys_dir):
 	with open(os.path.join(submit_directory, "cipressubmit.cfg"),"w") as cconfig_file:
-		#placeholder in case we want to add the job_status_email later
-		#print("[general]", file=cconfig_file)
-		#print("job_status_email=terri@sdsc.edu,mmiller@sdsc.edu")
+		#overwrite the e-mail so that terry and mark don't get benchmarking e-mails
+		print("[general]", file=cconfig_file)
+		print("job_status_email=")
 		
 		print("[templates]", file=cconfig_file)
 		print("templatedir=%s"%os.path.join(benchmark_sys_dir,"templates"), file=cconfig_file)
