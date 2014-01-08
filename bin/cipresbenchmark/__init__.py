@@ -48,7 +48,6 @@ class Benchmark(object):
 	def get_all(self):
 		
 		assert self.COMMANDLINE is not None, "No COMMANDILNE provided"
-		assert self.INPUT is not None, "No INPUT provided"
 		assert self.name is not None, "No Name?"
 		
 		names = self.vars.keys()
@@ -83,7 +82,7 @@ import json
 def setup_rundir(top_directory,parameter_dict):
 	myUUID = uuid.uuid1()
 	timestr = time.strftime("%Y_%m_%d_%H:%M",time.localtime())
-	outdirname = "%s_%s__%s__%s" % (parameter_dict['NAME'],parameter_dict['INPUT'], timestr, myUUID)
+	outdirname = "%s_%s__%s__%s" % (parameter_dict['NAME'],parameter_dict.get('INPUT', "NONE"), timestr, myUUID)
 	full_outdirname = os.path.join(top_directory, outdirname)
 	
 	os.mkdir(full_outdirname)
