@@ -12,7 +12,7 @@ jobinfo_txt_varnames = ["Task label", "Task ID", "Tool", "created on","JobHandle
 jobinfo_defaults = {"Task label":"BenchmarkJob","JobHandle":"BenchmarkJob"}
 
 
-from itertools import product as cartprod
+from itertools import product as _cartprod
 
 class Benchmark(object):
 	"""
@@ -134,7 +134,7 @@ class Benchmark(object):
 		def todict(names, one_tup):
 			return dict(zip(names, one_tup))
 		
-		benchdicts = [todict(names, i) for i in cartprod(*values)]
+		benchdicts = [todict(names, i) for i in _cartprod(*values)]
 		
 		for funcname, funcfunc in self.varfuncs:
 			for onedict in benchdicts:
@@ -148,11 +148,24 @@ class Benchmark(object):
 
 
 
+import os as _os
+import time as _time
+import uuid as _uuid
+import json as _json
+def _write_property_file(filename, parameter_names, parameter_defaults, parameter_dict):
+	
+	#Local anonymous function to.
+	def _comment_property_name(instr):
+		return instr.replace(" ", "\ ")
+	
+	with open(filename,"w") as PROPERTIESFILE:
+		for prop_name in parameter_names:
+			prop_value = parameter_dict.get(prop_name, parameter_defaults.get(prop_name, None))
+			if prop_value is not None:
+				PROPERTIESFILE.write("%s=%s\n" % (_comment_property_name(prop_name), prop_value))
 
-import os
-import time
-import uuid
-import json
+
+
 def setup_rundir(top_directory,parameter_dict):
 	"""
 	Prepares a job directory for CipresSubmit. Returns the final path.
@@ -175,40 +188,35 @@ def setup_rundir(top_directory,parameter_dict):
 	@rtype: str
 	"""
 	
-	#Local anonymous function to.
-	def _comment_property_name(instr):
-		return instr.replace(" ", "\ ")
+	
 	
 	#Create the empty directory, giving it a meaningful, unique name.
 	
-	myUUID = uuid.uuid1()											#Uniquely identify this job.
-	timestr = time.strftime("%Y_%m_%d_%H:%M",time.localtime())		#The creation time of the job.
+	myUUID = _uuid.uuid1()											#Uniquely identify this job.
+	timestr = _time.strftime("%Y_%m_%d_%H:%M",_time.localtime())		#The creation time of the job.
 	outdirname = "%s_%s__%s__%s" % (parameter_dict['NAME'],parameter_dict.get('INPUT', "NONE"), timestr, myUUID)
-	full_outdirname = os.path.join(top_directory, outdirname)
+	full_outdirname = _os.path.join(top_directory, outdirname)
 	
-	os.mkdir(full_outdirname)
+	_os.mkdir(full_outdirname)
 	
 	#Dump the dictionary
-	with open(os.path.join(full_outdirname, "PARAMETERS.json"),"w") as dumpjsonfile:
-		json.dump(parameter_dict, dumpjsonfile,indent=1)
+	with open(_os.path.join(full_outdirname, "PARAMETERS.json"),"w") as dumpjsonfile:
+		_json.dump(parameter_dict, dumpjsonfile,indent=1)
 		dumpjsonfile.write("\n")
 		
 	#Create the _JOBINFO.TXT
-	with open(os.path.join(full_outdirname, "_JOBINFO.TXT"),"w") as JOBINFOFILE:
-		for ji_name in jobinfo_txt_varnames:
-			ji_value = parameter_dict.get(ji_name, jobinfo_defaults.get(ji_name, None))
-			if ji_value is not None:
-				JOBINFOFILE.write("%s=%s\n" % (_comment_property_name(ji_name), ji_value))
-				
+	JOBINFO_FILENAME = _os.path.join(full_outdirname, "_JOBINFO.TXT")
+	local_jobinfo_defaults = dict()
+	local_jobinfo_defaults.update(jobinfo_defaults)
+	local_jobinfo_defaults['JobHandle'] = outdirname #Better default for JobHandle
+	_write_property_file(JOBINFO_FILENAME,jobinfo_txt_varnames,jobinfo_defaults,parameter_dict)
+	
 	#Create the scheduler.conf
-	with open(os.path.join(full_outdirname,"scheduler.conf"),"w") as SCHEDULER_CONF:
-		for sc_name in scheduler_conf_varnames:
-			sc_value = parameter_dict.get(sc_name, scheduler_defaults.get(sc_name, None))
-			if sc_value is not None:
-				SCHEDULER_CONF.write("%s=%s\n" % (_comment_property_name(sc_name), sc_value) )
+	SCHEDULER_CONF_FILENAME = _os.path.join(full_outdirname,"scheduler.conf")
+	_write_property_file(SCHEDULER_CONF_FILENAME, scheduler_conf_varnames, scheduler_defaults, parameter_dict)
 	
 	#Create the COMMANDLINE
-	with open(os.path.join(full_outdirname,"COMMANDLINE"),"w") as COMMANDLINE_FILE:
+	with open(_os.path.join(full_outdirname,"COMMANDLINE"),"w") as COMMANDLINE_FILE:
 		COMMANDLINE_FILE.write("%s\n" % parameter_dict['COMMANDLINE'] )
 	
 	return full_outdirname
@@ -224,13 +232,13 @@ def create_cipressubmit_cfg(submit_directory, benchmark_sys_dir):
 	@param benchmark_sys_dir: The top level _absolute_ path to where this particular set of benchmarks, are stored. (The directory that contains ./bin/ ./templates/ etc.)
 	@type benchmark_sys_dir: str
 	"""
-	with open(os.path.join(submit_directory, "cipressubmit.cfg"),"w") as cconfig_file:
+	with open(_os.path.join(submit_directory, "cipressubmit.cfg"),"w") as cconfig_file:
 		#overwrite the e-mail so that terry and mark don't get benchmarking e-mails
 		print("[general]", file=cconfig_file)
 		print("job_status_email=",file=cconfig_file)
 		
 		print("[templates]", file=cconfig_file)
-		print("templatedir=%s"%os.path.join(benchmark_sys_dir,"templates"), file=cconfig_file)
+		print("templatedir=%s"%_os.path.join(benchmark_sys_dir,"templates"), file=cconfig_file)
 		
 		#placeholder
 		#print("[hosts]", file=cconfig_file)
@@ -239,7 +247,7 @@ def create_cipressubmit_cfg(submit_directory, benchmark_sys_dir):
 		
 
 
-import subprocess
+import subprocess as _subprocess
 def submit_benchmark(submit_directory,COMMANDLINE,submitbinary="submit.py"):
 	"""
 	Actually submit a benchmark, via CipresSubmit.
@@ -255,7 +263,7 @@ def submit_benchmark(submit_directory,COMMANDLINE,submitbinary="submit.py"):
 	
 	@raise AssertionError: Asserts false and kills everything if any benchmark fails to start.
 	"""
-	submitproc = subprocess.Popen([submitbinary,"--", COMMANDLINE], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=submit_directory, shell=False)
+	submitproc = _subprocess.Popen([submitbinary,"--", COMMANDLINE], stderr=_subprocess.PIPE, stdout=_subprocess.PIPE, cwd=submit_directory, shell=False)
 	stdout, stderr = submitproc.communicate();
 	if submitproc.returncode != 0:
 		print(stdout)
