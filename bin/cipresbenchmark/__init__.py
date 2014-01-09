@@ -193,7 +193,7 @@ def setup_rundir(top_directory,parameter_dict):
 	#Create the empty directory, giving it a meaningful, unique name.
 	
 	myUUID = _uuid.uuid1()											#Uniquely identify this job.
-	timestr = _time.strftime("%Y_%m_%d_%H:%M",_time.localtime())		#The creation time of the job.
+	timestr = _time.strftime("%Y_%m_%d_%H%M",_time.localtime())		#The creation time of the job.
 	outdirname = "%s_%s__%s__%s" % (parameter_dict['NAME'],parameter_dict.get('INPUT', "NONE"), timestr, myUUID)
 	full_outdirname = _os.path.join(top_directory, outdirname)
 	
