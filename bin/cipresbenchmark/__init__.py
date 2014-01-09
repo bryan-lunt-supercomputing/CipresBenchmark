@@ -15,21 +15,65 @@ jobinfo_defaults = {"Task label":"BenchmarkJob","JobHandle":"BenchmarkJob"}
 from itertools import product as cartprod
 
 class Benchmark(object):
+	"""
+	Base class to store/handle benchmarks.
+	
+	To create a benchmark, you sub-class this in a module in the "./benchmarks" directory of your benchmark system.
+	Then you override the "setUp" method in your subclass.
+	
+	See the included example "example.py"
+	
+	"""
+	
+	
 	def __init__(self):
 		self.name = None
 		self.INPUT = None
+		self.INPUT_EXTENSION = ""
 		self.COMMANDLINE = None
 		self.vars = dict()
 		self.varfuncs = list()
 	
 	def setUp(self):
+		"""
+		Users will override this method to create their benchmarks.
+		
+		In your own benchmark class, you override setUp(self) to set all the vars, name, parameters, etc etc.
+		
+		Do not override __init__
+		
+		"""
 		print("NOT VIRTUAL!?!?!")
 		pass
 	
 	def setName(self,name):
+		"""
+		Sets the name of this benchmark, must be a single str, not available to jobs.
+		
+		@param name: The name of the benchmark.
+		@type name: str
+		
+		"""
 		self.name = name
 		
 	def addVar(self, name, value):
+		"""
+		Adds a variable for benchmarking.
+		
+		
+		Variables take three types:
+		
+		1) Simple: A single value, e.g. foo.addVar("I",1) or foo.addVar("myvariable", "hello world")
+		
+		2) Multiple: A list of values, e.g. foo.addVar("I", [1, 2, 3]) or foo.addVar('J', range(20)) or foo.addVar('K', ['this', 'is', 'a', 'test'])
+		
+		3) Callable: Anything that implements '__call__' (custom classes, a function, or just lambda x:....)
+					Callables must: a) Take only one parameter (other than self?), which is a dict<str,obj> , the dictionary of all values so far.
+									b) return a simple value in one of the supported types (str, int, float, or something with a good __repr__ method.)
+					
+					Callables are interpreted after all other parameters, and in the order they were added in. (So one can depend upon a previous one.)
+		
+		"""
 		if hasattr(value, '__call__'):
 			self.varfuncs.append((name, value))
 		else: #Not a callable
@@ -39,13 +83,44 @@ class Benchmark(object):
 				self.vars[name] = [value]
 	
 	def setInput(self, inputname):
+		"""
+		Input gets slightly special treatment.
+		
+		Having a special method also emphasizes that we are input-oriented. (Though input is not always even required.)
+		"""
 		self.INPUT = inputname
 		self.addVar("INPUT",inputname)
 	
+	def setInputExtension(self,extension):
+		"""
+		Some programs to be benchmarked may demand that the input actually have a specific file-extension.
+		
+		AVOID USING WHEN POSSIBLE.
+		
+		@param extension: The file extension to use, must include any dot or other separator. e.g. ".xml"
+		"""
+		self.INPUT_EXTENSION = extension
+	
 	def setCommandline(self,template):
+		"""
+		Provide a template for the command-line. Currently, you MUST provide this as a python string-format type string, USING NAMED FORMAT.
+		
+		Example: "echo %(K)i" : Looks for a variable named 'K' in the parameter dictionary, and interprets it as an integer.
+		
+		There will be a file named "INPUT" (plus the file-extension, if any) in the run directory, this is _not_ a variable. The variable 'INTPUT' will give the original name, if that is somehow needed.
+		
+		
+		"""
 		self.COMMANDLINE = template
 	
 	def get_all(self):
+		"""
+		Executes the logic of this benchmark to create several parameter dictionaries that can be used to start benchmarks.
+		
+		@return: A list of dictionaries, each dictionary containing all the parameters for one benchmark run.
+		@rtype: list
+		
+		"""
 		
 		assert self.COMMANDLINE is not None, "No COMMANDILNE provided"
 		assert self.name is not None, "No Name?"
@@ -72,16 +147,42 @@ class Benchmark(object):
 		return benchdicts
 
 
-def __comment_property_name(instr):
-	return instr.replace(" ", "\ ")
+
 
 import os
 import time
 import uuid
 import json
 def setup_rundir(top_directory,parameter_dict):
-	myUUID = uuid.uuid1()
-	timestr = time.strftime("%Y_%m_%d_%H:%M",time.localtime())
+	"""
+	Prepares a job directory for CipresSubmit. Returns the final path.
+	
+	This consists of:
+		Creating the directory.
+		Creating the properties files that CipresSubmit needs: '_JOBINFO.TXT' and 'scheduler.conf'.
+			These are populated with default values, but any value can be overridden by specifying it in the benchmark object.
+		Saving the commandline to the file "COMMANDLINE" for other debugging.
+		
+		It is left to other code to actually copy over the input file to the name 'INPUT'
+	
+	@param top_directory: The path to the top directory that will contain run-directories. Each job gets a new directory inside this.
+	@type top_directory: str
+	
+	@param parameter_dict: A dict<str,obj> containing parameters for one benchmark
+	@type parameter_dict: dict
+	
+	@return: The full (relative?) path to the job directory that was created.
+	@rtype: str
+	"""
+	
+	#Local anonymous function to.
+	def _comment_property_name(instr):
+		return instr.replace(" ", "\ ")
+	
+	#Create the empty directory, giving it a meaningful, unique name.
+	
+	myUUID = uuid.uuid1()											#Uniquely identify this job.
+	timestr = time.strftime("%Y_%m_%d_%H:%M",time.localtime())		#The creation time of the job.
 	outdirname = "%s_%s__%s__%s" % (parameter_dict['NAME'],parameter_dict.get('INPUT', "NONE"), timestr, myUUID)
 	full_outdirname = os.path.join(top_directory, outdirname)
 	
@@ -97,14 +198,14 @@ def setup_rundir(top_directory,parameter_dict):
 		for ji_name in jobinfo_txt_varnames:
 			ji_value = parameter_dict.get(ji_name, jobinfo_defaults.get(ji_name, None))
 			if ji_value is not None:
-				JOBINFOFILE.write("%s=%s\n" % (__comment_property_name(ji_name), ji_value))
+				JOBINFOFILE.write("%s=%s\n" % (_comment_property_name(ji_name), ji_value))
 				
 	#Create the scheduler.conf
 	with open(os.path.join(full_outdirname,"scheduler.conf"),"w") as SCHEDULER_CONF:
 		for sc_name in scheduler_conf_varnames:
 			sc_value = parameter_dict.get(sc_name, scheduler_defaults.get(sc_name, None))
 			if sc_value is not None:
-				SCHEDULER_CONF.write("%s=%s\n" % (__comment_property_name(sc_name), sc_value) )
+				SCHEDULER_CONF.write("%s=%s\n" % (_comment_property_name(sc_name), sc_value) )
 	
 	#Create the COMMANDLINE
 	with open(os.path.join(full_outdirname,"COMMANDLINE"),"w") as COMMANDLINE_FILE:
@@ -114,6 +215,15 @@ def setup_rundir(top_directory,parameter_dict):
 
 
 def create_cipressubmit_cfg(submit_directory, benchmark_sys_dir):
+	"""
+	Creates a local 'cipressubmit.cfg' that overrides the global configuration for CipresSubmit, this allows you to use an existing (for example, production) installation of CipresSubmit.
+	
+	@param submit_directory: The path to a job directory.
+	@type submit_directory: str
+	
+	@param benchmark_sys_dir: The top level _absolute_ path to where this particular set of benchmarks, are stored. (The directory that contains ./bin/ ./templates/ etc.)
+	@type benchmark_sys_dir: str
+	"""
 	with open(os.path.join(submit_directory, "cipressubmit.cfg"),"w") as cconfig_file:
 		#overwrite the e-mail so that terry and mark don't get benchmarking e-mails
 		print("[general]", file=cconfig_file)
@@ -131,6 +241,20 @@ def create_cipressubmit_cfg(submit_directory, benchmark_sys_dir):
 
 import subprocess
 def submit_benchmark(submit_directory,COMMANDLINE,submitbinary="submit.py"):
+	"""
+	Actually submit a benchmark, via CipresSubmit.
+	
+	@param submit_directory: The path to the job directory, which becomes the CWD when running CipresSubmit
+	@type submit_directory: str
+	
+	@param COMMANDLINE: The commandline of the job you want to run.
+	@type COMMANDLINE: str
+	
+	@param submitbinary: The name of the tool to use to submit, could be an absolute path or not. Defaults to "submit.py"
+	@type submitbinary: str
+	
+	@raise AssertionError: Asserts false and kills everything if any benchmark fails to start.
+	"""
 	submitproc = subprocess.Popen([submitbinary,"--", COMMANDLINE], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=submit_directory, shell=False)
 	stdout, stderr = submitproc.communicate();
 	if submitproc.returncode != 0:

@@ -31,7 +31,7 @@ def main():
 	benchmark_dir = os.path.join(benchmark_system_dir,"benchmarks")
 	
 	#load all benchmarks
-	benchmarks = BL.loadBenchmarksFromPath(benchmark_dir)
+	benchmarks = BL.load_benchmarks_from_path(benchmark_dir)
 	
 	
 	#TODO: find out what resource we're on? Or should that be part of benchmark?

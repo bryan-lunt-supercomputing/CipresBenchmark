@@ -19,7 +19,6 @@
 
 function exit_trap() {
 	date '+%s' > exit.txt
-	pkill -${1} -P $$ 
 }
 
 source /etc/profile.d/modules.sh
@@ -34,6 +33,9 @@ source /etc/profile.d/modules.sh
 cd <%jobdir%>
 
 #setup signal handlers
+set -m
+set -b
+
 trap "exit_trap INT" EXIT SIGINT
 trap "exit_trap TERM" SIGTERM
 
@@ -42,6 +44,10 @@ date "+%s" > start.txt
 export CIPRES_THREADSPP=<%threads_per_process%>
 export CIPRES_NP=<%mpi_processes%>
 
-./batch_command.cmdline 1>stdout.txt 2>stderr.txt
+(./batch_command.cmdline 1>stdout.txt 2>stderr.txt)&
+SUBJOBPID=$!
+wait ${SUBJOBPID} #signal handlers might interrupt this, in that case, they execute between this and the next line.
 
 date "+%s" > done.txt
+kill -s TERM ${SUBJOBPID} 2>/dev/null 1>/dev/null 
+wait ${SUBJOBPID}
