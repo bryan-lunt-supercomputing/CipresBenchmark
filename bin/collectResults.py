@@ -46,22 +46,22 @@ def main():
 		schemaString = "create table %s( %s, UUID, EXECUTION_TIME, COMMANDLINE varchar);" % (NAME, ",".join(varnames) )
 		MemDB.execute(schemaString)
 		
-		individual_outputs = [i for i in os.listdir(output_dir) if os.path.isdir(i) and i.startswith(NAME + "_")]
+		individual_outputs = [i for i in os.listdir(output_dir) if i.startswith(NAME + "_") and os.path.isdir(os.path.join(output_dir, i))]
 		for one_output in individual_outputs:
 			UUID = re.sub('.*__','',one_output)
 			
 			start = 0
 			end = 0
 			
-			with open(os.path.join(one_output,'start.txt')) as startfile:
+			with open(os.path.join(output_dir, one_output,'start.txt')) as startfile:
 				start = int(startfile.read())
 			
-			with open(os.path.join(one_output,'done.txt')) as endfile:
+			with open(os.path.join(output_dir, one_output,'done.txt')) as endfile:
 				end = int(endfile.read())
 			
 			EXECUTION_TIME = end - start
 			
-			with open(os.path.join(one_output, 'PARAMETERS.json')) as paramfile:
+			with open(os.path.join(output_dir, one_output, 'PARAMETERS.json')) as paramfile:
 				other_parameters = json.load(paramfile)
 			
 			all_params = dict()
@@ -73,8 +73,8 @@ def main():
 			all_values = [all_params[i] for i in all_names]
 			
 			insertString = "insert into %s(%s) values (%s)" % ( NAME, ','.join(all_names), ','.join(all_values))
-			MemDb.execute(insertString)
-		
+			MemDB.execute(insertString)
+	
 
 if __name__ == "__main__":
 	main()
