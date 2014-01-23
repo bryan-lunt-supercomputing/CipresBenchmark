@@ -9,6 +9,7 @@ from __future__ import print_function
 import cipresbenchmark.BenchmarkLoader as BL
 
 import argparse
+import sys
 import os
 import re
 import json
@@ -52,12 +53,19 @@ def main():
 			
 			start = 0
 			end = 0
+			try:
+				with open(os.path.join(output_dir, one_output,'start.txt')) as startfile:
+					start = int(startfile.read())
+			except:
+				print("JOB: ", one_output, " not started", file=sys.stderr)
+				continue
 			
-			with open(os.path.join(output_dir, one_output,'start.txt')) as startfile:
-				start = int(startfile.read())
-			
-			with open(os.path.join(output_dir, one_output,'done.txt')) as endfile:
-				end = int(endfile.read())
+			try:
+				with open(os.path.join(output_dir, one_output,'done.txt')) as endfile:
+					end = int(endfile.read())
+			except:
+				print("JOB: ", one_output, " not finished", file=sys.stderr)
+				continue
 			
 			EXECUTION_TIME = end - start
 			
