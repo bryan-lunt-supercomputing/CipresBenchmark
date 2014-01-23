@@ -10,6 +10,7 @@ import cipresbenchmark.BenchmarkLoader as BL
 
 import argparse
 import os
+import re
 import json
 
 import sqlite3
@@ -38,14 +39,41 @@ def main():
 		onebench.setUp();
 		#create an appropriate table to hold the results of this benchmark
 		
+		NAME = onebench.name
 		varnames = onebench.getVarnames()
 		
 		
-		schemaString = "create table %s( %s, UUID, EXECUTION_TIME, COMMANDLINE varchar);" % (onebench.name, ",".join(varnames) )
+		schemaString = "create table %s( %s, UUID, EXECUTION_TIME, COMMANDLINE varchar);" % (NAME, ",".join(varnames) )
 		MemDB.execute(schemaString)
 		
-		import pdb
-		pdb.set_trace()
+		individual_outputs = [i for i in os.listdir(output_dir) if os.path.isdir(i) and i.startswith(NAME + "_")]
+		for one_output in individual_outputs:
+			UUID = re.sub('.*__','',one_output)
+			
+			start = 0
+			end = 0
+			
+			with open(os.path.join(one_output,'start.txt')) as startfile:
+				start = int(startfile.read())
+			
+			with open(os.path.join(one_output,'done.txt')) as endfile:
+				end = int(endfile.read())
+			
+			EXECUTION_TIME = end - start
+			
+			with open(os.path.join(one_output, 'PARAMETERS.json')) as paramfile:
+				other_parameters = json.load(paramfile)
+			
+			all_params = dict()
+			all_params.update(other_parameters)
+			all_params['EXECUTION_TIME'] = EXECUTION_TIME
+			all_params['UUID'] = UUID
+			
+			all_names = all_params.keys()
+			all_values = [all_params[i] for i in all_names]
+			
+			insertString = "insert into %s(%s) values (%s)" % ( NAME, ','.join(all_names), ','.join(all_values))
+			MemDb.execute(insertString)
 		
 
 if __name__ == "__main__":
