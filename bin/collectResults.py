@@ -35,9 +35,13 @@ def main():
 	benchmarks = BL.load_benchmarks_from_path(benchmark_dir)
 	
 	for onebench in benchmarks:
-		print foobar
+		onebench.setUp();
 		#create an appropriate table to hold the results of this benchmark
-		schemaString = "create table %s(INPUT varchar, COMMANDLINE varchar, UUID, %s, EXECUTION_TIME);" % (onebench.name, ",".join(onebench.getVarnames()))
+		
+		varnames = onebench.getVarnames()
+		
+		
+		schemaString = "create table %s( %s, UUID, EXECUTION_TIME, COMMANDLINE varchar);" % (onebench.name, ",".join(varnames) )
 		MemDB.execute(schemaString)
 		
 		import pdb
