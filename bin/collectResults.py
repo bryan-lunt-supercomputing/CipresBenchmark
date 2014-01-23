@@ -94,6 +94,16 @@ def main():
 		
 		#Prepare a .csv report
 		#TODO finish this.
+		with open(os.path.join(report_dir,NAME + ".csv"),"w") as one_report:
+			print("#NAME = ", NAME, file=one_report)
+			print("#%s" % (','.join(varnames))," UUID, EXECUTION_TIME, COMMANDLINE", file=one_report)
+			mywriter = csv.writer(one_report)
+			
+			myResults = MemDB.execute("select * from %s;" % (NAME))
+			
+			for one_result in myResults:
+				mywriter.writerow(one_result)
+			
 	
 
 if __name__ == "__main__":
