@@ -38,6 +38,10 @@ def main():
 	
 	
 	for onebench in benchmarks:
+		if hasattr(onebench.__class__,"disabled") and onebench.__class__.disabled:
+			print( "NAME: %s is disabled" % (onebench.name ) )
+			continue
+		
 		onebench.setUp()
 		realizations = onebench.get_all()
 		print( "NAME: %s Number of tests: %i" % ( onebench.name, len(realizations)) )

@@ -34,6 +34,9 @@ class Benchmark(object):
 		self.vars = dict()
 		self.varfuncs = list()
 	
+	def getVarnames(self):
+		return self.vars.keys() + self.varfuncs.keys()
+	
 	def setUp(self):
 		"""
 		Users will override this method to create their benchmarks.
