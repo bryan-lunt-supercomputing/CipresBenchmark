@@ -14,10 +14,13 @@ import os
 import re
 import json
 
+import csv
+
 import sqlite3
 
 def main():
 	parser = argparse.ArgumentParser()
+	parser.add_argument("--sqlitefile", default=":memory:")
 	args = parser.parse_args()
 	
 	script_abs_path = os.path.realpath(__file__)
@@ -28,9 +31,14 @@ def main():
 	output_dir = os.path.join(benchmark_system_dir,"output")
 	input_dir  = os.path.join(benchmark_system_dir,"inputs")
 	benchmark_dir = os.path.join(benchmark_system_dir,"benchmarks")
+	report_dir = os.path.join(benchmark_system_dir, "reports")
+	try:
+		os.mkdir(report_dir)#make sure that such a directory exists
+	except:
+		pass
 	
 	
-	MemDB = sqlite3.connect(":memory:")
+	MemDB = sqlite3.connect(args.sqlitefile)
 	
 	
 	#load all benchmarks (We need this in order to build the table)
@@ -38,7 +46,7 @@ def main():
 	
 	for onebench in benchmarks:
 		onebench.setUp();
-		#create an appropriate table to hold the results of this benchmark
+		#create an appropriate table to hold the results of this benchmark (Since each benchmakr has different parameters, we can't just use one format, unless we want to sacrifice the ability to have a variable be a column.
 		
 		NAME = onebench.name
 		varnames = onebench.getVarnames()
@@ -76,12 +84,16 @@ def main():
 			all_params.update(other_parameters)
 			all_params['EXECUTION_TIME'] = EXECUTION_TIME
 			all_params['UUID'] = UUID
+			all_params.pop("NAME")
 			
 			all_names = all_params.keys()
-			all_values = [all_params[i] for i in all_names]
+			all_values = ['"' + str(all_params[i]) + '"' for i in all_names]
 			
-			insertString = "insert into %s(%s) values (%s)" % ( NAME, ','.join(all_names), ','.join(all_values))
+			insertString = "insert into %s( %s ) values ( %s )" % ( NAME, ','.join(all_names), ','.join(all_values))
 			MemDB.execute(insertString)
+		
+		#Prepare a .csv report
+		#TODO finish this.
 	
 
 if __name__ == "__main__":
