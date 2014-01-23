@@ -6,6 +6,8 @@ Created on Jan 23, 2014
 '''
 from __future__ import print_function
 
+import cipresbenchmark.BenchmarkLoader as BL
+
 import argparse
 import os
 import json

@@ -32,10 +32,10 @@ class Benchmark(object):
 		self.INPUT_EXTENSION = ""
 		self.COMMANDLINE = None
 		self.vars = dict()
-		self.varfuncs = list()
+		self.varfuncs = list() # list of (name, func(dict)), using a list to keep them in order
 	
 	def getVarnames(self):
-		return self.vars.keys() + self.varfuncs.keys()
+		return self.vars.keys() + [i[0] for i in self.varfuncs]
 	
 	def setUp(self):
 		"""
