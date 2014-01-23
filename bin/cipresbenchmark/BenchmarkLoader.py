@@ -10,7 +10,7 @@ from __future__ import print_function
 import sys as _sys
 import os as _os
 import imp as _imp
-from cipresbenchmark import Benchmark
+from cipresbenchmark import Benchmark, Disabled
 
 def load_benchmarks_from_module(module):
 	"""
@@ -31,7 +31,8 @@ def load_benchmarks_from_module(module):
 		#Benchmark is a subclass of Benchmark, so make sure _not_ to instantiate that.
 		#It WILL be present in most modules that contain a sub-class (unless the programmer was cleaver, never require the end user to be cleaver.).
 		if isinstance(obj, type) and issubclass(obj, Benchmark) and not obj is Benchmark:
-			benchmarks.append(obj())
+			if not hasattr(obj,"disabled") or not obj.disabled:
+				benchmarks.append(obj())
 	
 	return benchmarks
 

@@ -27,7 +27,7 @@ class Benchmark(object):
 	
 	
 	def __init__(self):
-		self.name = None
+		self.name = self.__class__.__name__ #default to using the classname.
 		self.INPUT = None
 		self.INPUT_EXTENSION = ""
 		self.COMMANDLINE = None
@@ -146,7 +146,9 @@ class Benchmark(object):
 		
 		return benchdicts
 
-
+def Disabled(inclass):
+	inclass.disabled = True
+	return inclass
 
 import os as _os
 import time as _time
@@ -209,7 +211,7 @@ def setup_rundir(top_directory,parameter_dict):
 	local_jobinfo_defaults = dict()
 	local_jobinfo_defaults.update(jobinfo_defaults)
 	local_jobinfo_defaults['JobHandle'] = outdirname #Better default for JobHandle
-	_write_property_file(JOBINFO_FILENAME,jobinfo_txt_varnames,jobinfo_defaults,parameter_dict)
+	_write_property_file(JOBINFO_FILENAME,jobinfo_txt_varnames,local_jobinfo_defaults,parameter_dict)
 	
 	#Create the scheduler.conf
 	SCHEDULER_CONF_FILENAME = _os.path.join(full_outdirname,"scheduler.conf")
