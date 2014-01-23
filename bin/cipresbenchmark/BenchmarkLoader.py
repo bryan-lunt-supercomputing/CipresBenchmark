@@ -57,7 +57,7 @@ def load_benchmarks_from_path(benchpath):
 		full_path = _os.path.join(benchpath,onepath)
 		if _os.path.isfile(full_path) and full_path.endswith(".py"):
 			try:
-				mymodule = _imp.load_source('ANONYMOUS',full_path)
+				mymodule = _imp.load_source('benchmarks__' + onepath.replace('.py',''),full_path)
 				benchmarks.extend(load_benchmarks_from_module(mymodule))
 			except Exception as e:
 				print("There was an error : ", e, file=_sys.stderr)
