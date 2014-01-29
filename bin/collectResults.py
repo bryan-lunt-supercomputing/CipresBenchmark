@@ -46,13 +46,13 @@ def main():
 	
 	for onebench in benchmarks:
 		onebench.setUp();
-		#create an appropriate table to hold the results of this benchmark (Since each benchmakr has different parameters, we can't just use one format, unless we want to sacrifice the ability to have a variable be a column.
+		#create an appropriate table to hold the results of this benchmark (Since each benchmark has different parameters, we can't just use one format, unless we want to sacrifice the ability to have a variable be a column.
 		
 		NAME = onebench.name
 		varnames = onebench.getVarnames()
 		
 		
-		schemaString = "create table %s( %s, UUID, EXECUTION_TIME, COMMANDLINE varchar);" % (NAME, ",".join(varnames) )
+		schemaString = "create table %s( %s, UUID, EXECUTION_TIME, CORES, COMMANDLINE varchar);" % (NAME, ",".join(varnames) )
 		MemDB.execute(schemaString)
 		
 		individual_outputs = [i for i in os.listdir(output_dir) if i.startswith(NAME + "_") and os.path.isdir(os.path.join(output_dir, i))]
@@ -84,6 +84,7 @@ def main():
 			all_params.update(other_parameters)
 			all_params['EXECUTION_TIME'] = EXECUTION_TIME
 			all_params['UUID'] = UUID
+			all_params['CORES'] = int(all_params.get('mpi_processes',1))*int(all_params.get('threads_per_process',1))
 			all_params.pop("NAME")
 			
 			all_names = all_params.keys()
@@ -95,8 +96,13 @@ def main():
 		#Prepare a .csv report
 		#TODO finish this.
 		with open(os.path.join(report_dir,NAME + ".csv"),"w") as one_report:
-			print("#NAME = ", NAME, file=one_report)
-			print("#%s" % (','.join(varnames))," UUID, EXECUTION_TIME, COMMANDLINE", file=one_report)
+			#print commented header
+			
+			
+			print("#%s" % (','.join(varnames))," UUID, EXECUTION_TIME, CORES, COMMANDLINE", file=one_report)
+			
+			
+			#begin writing results
 			mywriter = csv.writer(one_report)
 			
 			myResults = MemDB.execute("select * from %s;" % (NAME))
