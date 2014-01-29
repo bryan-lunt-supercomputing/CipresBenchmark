@@ -52,7 +52,7 @@ def main():
 		varnames = onebench.getVarnames()
 		
 		
-		schemaString = "create table %s( %s, UUID, EXECUTION_TIME, CORES, COMMANDLINE varchar);" % (NAME, ",".join(varnames) )
+		schemaString = "create table %s( %s, UUID, EXECUTION_TIME int, CORES int, COMMANDLINE varchar);" % (NAME, ",".join(varnames) )
 		MemDB.execute(schemaString)
 		
 		individual_outputs = [i for i in os.listdir(output_dir) if i.startswith(NAME + "_") and os.path.isdir(os.path.join(output_dir, i))]
@@ -96,16 +96,29 @@ def main():
 		#Prepare a .csv report
 		#TODO finish this.
 		with open(os.path.join(report_dir,NAME + ".csv"),"w") as one_report:
+			#reorder the parameters for nice output
+			before_columns_order = ['CORES', 'EXECUTION_TIME', 'INPUT']
+			after_columns_order = ['UUID', 'COMMANDLINE']
+			
+			output_local_varnames = list(varnames)
+			for one_name in before_columns_order + after_columns_order:
+				try:
+					output_local_varnames.remove(one_name)
+				except:
+					pass
+			
+			output_local_varnames = before_columns_order + output_local_varnames + after_columns_order
+			
 			#print commented header
-			
-			
-			print("#%s" % (','.join(varnames))," UUID, EXECUTION_TIME, CORES, COMMANDLINE", file=one_report)
+			print("#%s" % (','.join(output_local_varnames) ), file=one_report)
 			
 			
 			#begin writing results
 			mywriter = csv.writer(one_report)
 			
-			myResults = MemDB.execute("select * from %s;" % (NAME))
+			
+			
+			myResults = MemDB.execute("select %s from %s order by CORES asc;" % (','.join(output_local_varnames), NAME))
 			
 			for one_result in myResults:
 				mywriter.writerow(one_result)
