@@ -19,6 +19,7 @@
 
 function exit_trap() {
 	date '+%s' > exit.txt
+	qstat -f $PBS_JOBID > qstat_dump.txt
 }
 
 source /etc/profile.d/modules.sh

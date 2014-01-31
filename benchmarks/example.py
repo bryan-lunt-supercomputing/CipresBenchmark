@@ -6,11 +6,11 @@ Created on Dec 31, 2013
 
 #TODO: Example should contain a list of all the necessary elements of _JOBINFO and scheduler.conf
 
-from  cipresbenchmark import Benchmark
+from  cipresbenchmark import Benchmark, Disabled
 
+@Disabled #delete this line to enable this benchark
 class Example(Benchmark):
 	def setUp(self):
-		self.setName("EXAMPLE")
 		self.setInput("baz")
 		
 		self.addVar("runhours",20)
