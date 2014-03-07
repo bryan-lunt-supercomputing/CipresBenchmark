@@ -53,7 +53,13 @@ def main():
 			#Copy in the input
 			#TODO: Use a symbolic link to the input? That might save on disk-space.
 			if one_realization.get('INPUT', None) is not None:
-				shutil.copy(os.path.join(input_dir,one_realization['INPUT']), os.path.join(submit_directory,"INPUT"))
+				INPUT_SOURCE_PATH = os.path.join(input_dir,one_realization['INPUT'])
+				INPUT_DEST_PATH = os.path.join(submit_directory,"INPUT")
+				
+				if os.path.isdir(INPUT_SOURCE_PATH):
+					shutil.copytree(INPUT_SOURCE_PATH, INPUT_DEST_PATH)
+				else:
+					shutil.copy(INPUT_SOURCE_PATH, INPUT_DEST_PATH)
 			
 			create_cipressubmit_cfg(submit_directory,benchmark_system_dir)
 			
