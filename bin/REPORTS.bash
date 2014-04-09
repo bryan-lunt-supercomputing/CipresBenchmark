@@ -9,5 +9,5 @@ SCRIPT_ABS_PATH=$(readlink -f $0)
 SCRIPT_ABS_DIR=$(dirname $SCRIPT_ABS_PATH)
 BENCHMARK_SYS_DIR=$(dirname $SCRIPT_ABS_DIR)
 
-(cd ${BENCHMARK_SYS_DIR} ; PYTHONDONTWRITEBYTECODE="true" ./bin/benchSubmit.py; )
+(cd ${BENCHMARK_SYS_DIR} ; PYTHONDONTWRITEBYTECODE="true" ./bin/collectResults.py; )
 
