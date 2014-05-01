@@ -13,7 +13,7 @@ CipresSubmit
 
 ### Installation ###
 
-For each benchmarking task, you can clone the CipresBenchmark git repository:
+For each benchmarking project (potentially composed of multiple benchmarks (each composed of multiple runs)), you can clone the CipresBenchmark git repository:
 	git clone git@github.com:bryan-lunt/CipresBenchmark.git MyBenchmarks
 
 This will create everything necessary to begin benchmarking, but some settings will not be in-place.
@@ -28,11 +28,11 @@ Make sure to keep it up to date with updates on the main repo!
 
 ## Writing Benchmarks ##
 
-Benchmarks are written by writing a python class that extends the "cipresbenchmark.Benchmark" class, and overwriting the "setUp(self)" method. Multiple benchmarks can be stored in the same module.
+Benchmarks are created by writing a python class that extends the "cipresbenchmark.Benchmark" class, and overwriting the "setUp(self)" method. Multiple benchmarks can be stored in the same module.
 
 Benchmarks take the cartesian product of all values of their variables and input, so a simple benchmark file can run several possible combinations of inputs.
 
-See the file ./benchmarks/Example.py for an example.
+See the file ./benchmarks/example.py for an example.
 
 ### Name of benchmark ###
 A benchmark is named for its class name.
@@ -62,6 +62,7 @@ The input file (or directory) is copied into the run directory as "INPUT".
 
 ## Running Benchmarks ##
 Run the script ./bin/START.bash and it will submit all benchmarks that are not disabled with the "cipresbenchmark.Benchmark.Disabled" annotation.
+This also lets you start a few benchmarks sequentially or add more later, or whatever. See the example benchmark.
 
 ## Getting Results ##
 Once benchmarks are finished, running the ./bin/RESULTS.bash file will result in a directory called "reports" containing Comma Separated Values files, one for each benchmark.
@@ -78,4 +79,19 @@ These files have a header line that describes their contents, which is all veria
 	templates: Overrides the templates from CipresSubmit . You probably don't need to alter these, but these are the templates your benchmark jobs will use, including various benchmarking stuff.
 	output: Each job will get a directory here.
 	inputs: Input files will be copied from here.
-	benchmarks: Put modules containing benchmarks here.	
+	benchmarks: Put modules containing benchmarks here.
+
+## License ##
+This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
