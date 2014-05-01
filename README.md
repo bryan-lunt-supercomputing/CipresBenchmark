@@ -52,7 +52,24 @@ The method "cipresbenchmark.Benchmark.setInput(self, inputs)" sets the input(s) 
 #### Setting Variables ####
 The method "cipresbenchmark.Benchmark.setVar(self, name, value)" sets variables to be used in formatting the command-line.
 - A single value (string, int, float, etc) can be assigned to this variable name.
-- A list of values can be assigned, in which case every combination of this variable's values 
+- A list of values can be assigned, in which case every combination of this variable's values will be used in Cartesian Product with all input values and all values of all other variables.
+- A funtion that calculates a variable from all variables so far can be provided. For details please examine the code of "cipresbenchmark.Benchmark"
+
+#### Setting the Commandline ####
+The method "cipresbenchmark.Benchmark.setCommandline(self, cmdline_str)" is used to provide a template to use for the commandline.
+The template is a python template string, using named template values " like this %(I)i ". It's provided with all of the variable values, including those reserved for CipresSubmit (such as "mpi_processes" etc.).
+The input file (or directory) is copied into the run directory as "INPUT".
+
+## Running Benchmarks ##
+Run the script ./bin/START.bash and it will submit all benchmarks that are not disabled with the "cipresbenchmark.Benchmark.Disabled" annotation.
+
+## Getting Results ##
+Once benchmarks are finished, running the ./bin/RESULTS.bash file will result in a directory called "reports" containing Comma Separated Values files, one for each benchmark.
+These files have a header line that describes their contents, which is all veriables, the total number of cores, and the final command-line used. It should be appropriate for direct use with most spreadsheet and plotting softare.
+
+### Gnuplot commands to use these files ###
+	set datafile commentschars "#!%"
+	set datafile separator ","
 
 
 ## File hierarchy ##
