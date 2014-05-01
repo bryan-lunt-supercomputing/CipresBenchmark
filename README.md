@@ -1,37 +1,61 @@
-Introduction
+CipresSubmit
 ============
 
-Installation
-============
+## Introduction ##
 
-PreReq:
+
+## Installation ##
+
+### PreReq ###
 
 - CipresSubmit (Installed and configured for your system) : https://github.com/bryan-lunt/CipresSubmit 
 - git
 
-Installation:
+### Installation ###
 
 For each benchmarking task, you can clone the CipresBenchmark git repository:
 	git clone git@github.com:bryan-lunt/CipresBenchmark.git MyBenchmarks
 
 This will create everything necessary to begin benchmarking, but some settings will not be in-place.
 
-Configuration:
-	You will need to add the script "submit.py" from CipresSubmit to your path, either globally (.profile) or in the script ./bin/START.bash in the CipresBenchmark directory.
+### Configuration ###
+You will need to add the script "submit.py" from CipresSubmit to your path, either globally (.profile) or in the script ./bin/START.bash in the CipresBenchmark directory.
 
-	Depending on your system, you _may_ need to alter the templates that come with CipresBenchmark .
+Depending on your system, you _may_ need to alter the templates that come with CipresBenchmark .
 
-	You might consider saving these edited configurations in a local copy of the CipresBenchmark git repository, and cloning from that for every new benchmarking task.
-	Make sure to keep it up to date with updates on the main repo!
+You might consider saving these edited configurations in a local copy of the CipresBenchmark git repository, and cloning from that for every new benchmarking task.
+Make sure to keep it up to date with updates on the main repo!
 
-Writing Benchmarks
-==================
+## Writing Benchmarks ##
+
+Benchmarks are written by writing a python class that extends the "cipresbenchmark.Benchmark" class, and overwriting the "setUp(self)" method. Multiple benchmarks can be stored in the same module.
+
+Benchmarks take the cartesian product of all values of their variables and input, so a simple benchmark file can run several possible combinations of inputs.
+
+See the file ./benchmarks/Example.py for an example.
+
+### Name of benchmark ###
+A benchmark is named for its class name.
+
+### Benchmark setup ###
+Implement the "setUp(self)" method of your benchmark class, and make calls to:
+
+- self.setInput(file_or_directory_name)
+- self.addVar(variable_name,variable_value)
+- self.setCommandline("This is a python format string, it should used named formats that use the names of the variables you defined. %(I)i")
+
+#### Setting Inputs ####
+The method "cipresbenchmark.Benchmark.setInput(self, inputs)" sets the input(s) for a benchmark.
+- A single string gives the name of a single file or directory (for multiple input files that need to be grouped) that should be copied out of the ./inputs directory into the working directory of the benchmark job.
+- A list of strings give multiple files to each be treated as above in their respective jobs.
+
+#### Setting Variables ####
+The method "cipresbenchmark.Benchmark.setVar(self, name, value)" sets variables to be used in formatting the command-line.
+- A single value (string, int, float, etc) can be assigned to this variable name.
+- A list of values can be assigned, in which case every combination of this variable's values 
 
 
-
-
-
-File hierarchy:
+## File hierarchy ##
 
 	scripts: Put on the path for the benchmark job. Put either scripts you need, or symbolic links to other stuff you need here.
 	templates: Overrides the templates from CipresSubmit . You probably don't need to alter these, but these are the templates your benchmark jobs will use, including various benchmarking stuff.
