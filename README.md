@@ -4,7 +4,7 @@ CipresBenchmark
 ## Introduction ##
 This group of programs facilitates benchmarking (other) programs on queued cluster systems (such as those that use PBS/Torque or SGE/Open Grid Engine).
 
-Along with the CipresSubmit ( https://github.com/bryan-lunt/CipresSubmit ) I hope these programs will take a lot of the drudgery and the potential for misplaced input files, etc out of benchmarking.
+Along with the CipresSubmit ( https://github.com/bryan-lunt-supercomputing/CipresSubmit ) I hope these programs will take a lot of the drudgery and the potential for misplaced input files, etc out of benchmarking.
 
 This tool is intended to make preparing benchmarks similar to the process of preparing unit-tests. It should make benchmarks similarly reproducible.
  
@@ -13,7 +13,7 @@ This tool is intended to make preparing benchmarks similar to the process of pre
 
 ### Requirements ###
 
-- CipresSubmit (Installed and configured for your system) : https://github.com/bryan-lunt/CipresSubmit 
+- CipresSubmit (Installed and configured for your system) : https://github.com/bryan-lunt-supercomputing/CipresSubmit 
 - git
 
 ### Installation ###
