@@ -19,7 +19,11 @@ This tool is intended to make preparing benchmarks similar to the process of pre
 ### Installation ###
 
 For each benchmarking project (potentially composed of multiple benchmarks (each composed of multiple runs)), you can clone the CipresBenchmark git repository:
-	git clone git@github.com:bryan-lunt/CipresBenchmark.git MyBenchmarks
+
+```bash
+
+	git clone https://github.com/bryan-lunt-supercomputing/CipresBenchmark.git MyBenchmarks
+```
 
 This will create everything necessary to begin benchmarking, but some settings will not be in-place.
 
